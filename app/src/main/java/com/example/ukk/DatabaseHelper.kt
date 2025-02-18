@@ -4,6 +4,8 @@ import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
+import android.view.SurfaceControl
+import com.google.android.gms.analytics.ecommerce.Product
 
 
 class DatabaseHelper(context: android.content.Context) :
@@ -13,7 +15,8 @@ class DatabaseHelper(context: android.content.Context) :
         db.execSQL("INSERT INTO users (name, email, password, role) VALUES ('Admin', 'admin@gmail.com', '123456', 'admin')")
         db.execSQL("INSERT INTO users (name, email, password, role) VALUES ('User', 'user@gmail.com', '123456', 'user')")
         db.execSQL("CREATE TABLE products (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, price REAL, stock INTEGER)")
-        db.execSQL("""
+        db.execSQL(
+            """
     CREATE TABLE IF NOT EXISTS keranjang (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         product_id INTEGER NOT NULL,
@@ -21,7 +24,8 @@ class DatabaseHelper(context: android.content.Context) :
         price REAL NOT NULL,
         quantity INTEGER NOT NULL
     )
-    """.trimIndent())
+    """.trimIndent()
+        )
         db.execSQL(
             "CREATE TABLE IF NOT EXISTS pembelian (" +
                     "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -66,7 +70,10 @@ class DatabaseHelper(context: android.content.Context) :
 
     fun checkUser(email: String, password: String): String? {
         val db = readableDatabase
-        val cursor = db.rawQuery("SELECT role FROM users WHERE email=? AND password=?", arrayOf(email, password))
+        val cursor = db.rawQuery(
+            "SELECT role FROM users WHERE email=? AND password=?",
+            arrayOf(email, password)
+        )
         return if (cursor.moveToFirst()) {
             cursor.getString(0)
         } else {
@@ -75,6 +82,7 @@ class DatabaseHelper(context: android.content.Context) :
             cursor.close()
         }
     }
+
     fun registerUser(name: String, email: String, password: String, role: String): Boolean {
         val db = writableDatabase
         val cursor = db.rawQuery("SELECT * FROM users WHERE email=?", arrayOf(email))
@@ -83,7 +91,8 @@ class DatabaseHelper(context: android.content.Context) :
             return false
         }
         cursor.close()
-        val stmt = db.compileStatement("INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)")
+        val stmt =
+            db.compileStatement("INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)")
         stmt.bindString(1, name)
         stmt.bindString(2, email)
         stmt.bindString(3, password)
@@ -91,6 +100,7 @@ class DatabaseHelper(context: android.content.Context) :
         stmt.executeInsert()
         return true
     }
+
     fun getAllUsers(): List<String> {
         val usersList = mutableListOf<String>()
         val db = readableDatabase
@@ -104,6 +114,7 @@ class DatabaseHelper(context: android.content.Context) :
         cursor.close()
         return usersList
     }
+
     fun addProduct(name: String, price: Double, stock: Int): Boolean {
         val db = writableDatabase
         val stmt = db.compileStatement("INSERT INTO products (name, price, stock) VALUES (?, ?, ?)")
@@ -149,11 +160,13 @@ class DatabaseHelper(context: android.content.Context) :
     fun getCartItems(): List<CartItem> {
         val cartList = mutableListOf<CartItem>()
         val db = readableDatabase
-        val cursor = db.rawQuery("""
+        val cursor = db.rawQuery(
+            """
         SELECT k.id, p.name, k.price, k.quantity 
          FROM keranjang k 
         JOIN products p ON k.product_id = p.id
-               """, null)
+               """, null
+        )
 
 
         if (cursor.moveToFirst()) {
@@ -171,12 +184,12 @@ class DatabaseHelper(context: android.content.Context) :
         return cartList
 
     }
+
     fun clearCart() {
         val db = writableDatabase
         db.execSQL("DELETE FROM keranjang")
         db.close()
     }
-
 
 
     // Proses checkout, hapus semua item di keranjang
@@ -203,11 +216,13 @@ class DatabaseHelper(context: android.content.Context) :
         db.close()
 
     }
+
     fun removeCartItem(cartItemId: Int) {
         val db = writableDatabase
         db.delete("keranjang", "id=?", arrayOf(cartItemId.toString()))
         db.close()
     }
+
     fun getProductNameById(productId: Int): String? {
         val db = this.readableDatabase
         val query = "SELECT name FROM products WHERE id = ?"
@@ -220,8 +235,9 @@ class DatabaseHelper(context: android.content.Context) :
         cursor.close()
         return productName
     }
-    fun getAllTransactions(): List<Transaction> {
-        val transactions = mutableListOf<Transaction>()
+
+    fun getAllTransactions(): List<SurfaceControl.Transaction> {
+        val transactions = mutableListOf<SurfaceControl.Transaction>()
         val db = this.readableDatabase
         val query = "SELECT * FROM transaksi ORDER BY tanggal DESC"
         val cursor = db.rawQuery(query, null)
@@ -232,7 +248,7 @@ class DatabaseHelper(context: android.content.Context) :
                 val tanggal = cursor.getString(cursor.getColumnIndexOrThrow("tanggal"))
                 val totalHarga = cursor.getDouble(cursor.getColumnIndexOrThrow("total_harga"))
 
-                transactions.add(Transaction(id, tanggal, totalHarga))
+                transactions.add(SurfaceControl.Transaction (id, tanggal, totalHarga))
             } while (cursor.moveToNext())
         }
 

@@ -4,58 +4,70 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@color/white">
+    android:background="@drawable/yy">
 
+
+    <TextView
+        android:layout_width="191dp"
+        android:layout_height="51dp"
+        android:text="To-Do List"
+        android:textColorHint="@color/black"
+        android:textSize="40dp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.527"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:layout_editor_absoluteY="97dp"
+        tools:ignore="MissingConstraints" />
 
     <EditText
         android:id="@+id/etEmail"
-        android:layout_width="378dp"
-        android:layout_height="58dp"
+        android:layout_width="332dp"
+        android:layout_height="54dp"
         android:hint="Email"
+        android:textColorHint="@color/black"
         app:layout_constraintBottom_toTopOf="@+id/etPassword"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.484"
+        app:layout_constraintHorizontal_bias="0.493"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.908"
-        android:textColorHint="@color/black"/>
+        app:layout_constraintVertical_bias="0.912" />
 
     <EditText
         android:id="@+id/etPassword"
-        android:layout_width="378dp"
-        android:layout_height="62dp"
-        android:layout_marginBottom="44dp"
+        android:layout_width="332dp"
+        android:layout_height="54dp"
+        android:layout_marginBottom="28dp"
         android:hint="Password"
         android:inputType="textPassword"
+        android:textColorHint="@color/black"
         app:layout_constraintBottom_toTopOf="@+id/btnLogin"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.484"
-        app:layout_constraintStart_toStartOf="parent"
-        android:textColorHint="@color/black"/>
+        app:layout_constraintHorizontal_bias="0.493"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/btnLogin"
-        android:layout_width="474dp"
-        android:layout_height="49dp"
-        android:layout_marginBottom="104dp"
+        android:layout_width="325dp"
+        android:layout_height="48dp"
+        android:layout_marginBottom="352dp"
+        android:backgroundTint="@color/black"
         android:text="Login"
         android:textColor="@color/white"
         android:textSize="18dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        android:backgroundTint="@color/black"/>
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/tvRegister"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="68dp"
+        android:layout_marginBottom="308dp"
         android:text="Belum punya akun? Daftar di sini"
         android:textColor="@color/black"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.081"
         app:layout_constraintStart_toStartOf="parent" />
 
 

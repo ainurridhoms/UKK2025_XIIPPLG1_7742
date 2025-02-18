@@ -28,7 +28,7 @@ class LoginActivity : AppCompatActivity() {
                 val intent = if (role == "admin") {
                     Intent(this, LoginActivity::class.java)
                 } else {
-                    Intent(this, UserActivity::class.java)
+                    Intent(this, kegiatan::class.java)
                 }
                 startActivity(intent)
                 finish()
@@ -38,7 +38,7 @@ class LoginActivity : AppCompatActivity() {
         }
 
         registerTextView.setOnClickListener {
-            startActivity(Intent(this, RegisterActivity::class.java))
+            startActivity(Intent(this, loginButton::class.java))
         }
     }
 }
