@@ -1,263 +1,151 @@
 package com.example.ukk
 
 import android.content.ContentValues
+import android.content.Context
+import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-import android.util.Log
-import android.view.SurfaceControl
-import com.google.android.gms.analytics.ecommerce.Product
+
+class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
+
+    companion object {
+        private const val DATABASE_NAME = "ToDoList.db"
+        private const val DATABASE_VERSION = 1
 
 
-class DatabaseHelper(context: android.content.Context) :
-    SQLiteOpenHelper(context, "KasirDB", null, 5) {
-    override fun onCreate(db: SQLiteDatabase) {
-        db.execSQL("CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, email TEXT, password TEXT, role TEXT)")
-        db.execSQL("INSERT INTO users (name, email, password, role) VALUES ('Admin', 'admin@gmail.com', '123456', 'admin')")
-        db.execSQL("INSERT INTO users (name, email, password, role) VALUES ('User', 'user@gmail.com', '123456', 'user')")
-        db.execSQL("CREATE TABLE products (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, price REAL, stock INTEGER)")
-        db.execSQL(
-            """
-    CREATE TABLE IF NOT EXISTS keranjang (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        product_id INTEGER NOT NULL,
-        product_name TEXT NOT NULL,
-        price REAL NOT NULL,
-        quantity INTEGER NOT NULL
-    )
-    """.trimIndent()
-        )
-        db.execSQL(
-            "CREATE TABLE IF NOT EXISTS pembelian (" +
-                    "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    "product_id INTEGER, " +
-                    "quantity INTEGER, " +
-                    "total_price DOUBLE, " +
-                    "date TEXT)"
-        )
-        db.execSQL(
-            "CREATE TABLE IF NOT EXISTS barang (" +
-                    "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    "name TEXT, " +
-                    "price DOUBLE, " +
-                    "stock INTEGER)"
-        )
-        val createTableTransactions = """
-    CREATE TABLE transaksi (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        produk TEXT NOT NULL,
-        jumlah INTEGER NOT NULL,
-        total_harga REAL NOT NULL,
-        tanggal TEXT NOT NULL
-    )
-""".trimIndent()
-        db.execSQL(createTableTransactions)
+        private const val TABLE_USERS = "Users"
+        private const val COLUMN_USER_ID = "id"
+        private const val COLUMN_USERNAME = "username"
+        private const val COLUMN_PASSWORD = "password"
 
-        Log.d("DatabaseHelper", "Database created successfully!")
 
+        private const val TABLE_TASKS = "Tasks"
+        private const val COLUMN_TASK_ID = "id"
+        private const val COLUMN_USER_ID_FK = "user_id"
+        private const val COLUMN_TITLE = "title"
+        private const val COLUMN_DESCRIPTION = "description"
+        private const val COLUMN_CATEGORY = "category"
+        private const val COLUMN_STATUS = "status"
+        private const val COLUMN_CREATED_AT = "created_at"
     }
 
-    override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        db.execSQL("DROP TABLE IF EXISTS users")
-        db.execSQL("DROP TABLE IF EXISTS products")
-        db.execSQL("DROP TABLE IF EXISTS keranjang") // Tambahkan ini untuk menghapus tabel yang lama
-        db.execSQL("DROP TABLE IF EXISTS pembelian")
-        db.execSQL("DROP TABLE IF EXISTS barang")
-        db.execSQL("DROP TABLE IF EXISTS transactions")
+    override fun onCreate(db: SQLiteDatabase?) {
 
-        onCreate(db) // Panggil sekali saja agar semua tabel dibuat ulang
+        val createUserTable = ("CREATE TABLE $TABLE_USERS (" +
+                "$COLUMN_USER_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "$COLUMN_USERNAME TEXT UNIQUE, " +
+                "$COLUMN_PASSWORD TEXT)")
 
+
+        val createTaskTable = ("CREATE TABLE $TABLE_TASKS (" +
+                "$COLUMN_TASK_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "$COLUMN_USER_ID_FK INTEGER, " +
+                "$COLUMN_TITLE TEXT, " +
+                "$COLUMN_DESCRIPTION TEXT, " +
+                "$COLUMN_CATEGORY TEXT, " +
+                "$COLUMN_STATUS INTEGER DEFAULT 0, " +
+                "$COLUMN_CREATED_AT TEXT, " +
+                "FOREIGN KEY($COLUMN_USER_ID_FK) REFERENCES $TABLE_USERS($COLUMN_USER_ID) ON DELETE CASCADE)")
+
+        db?.execSQL(createUserTable)
+        db?.execSQL(createTaskTable)
     }
 
-    fun checkUser(email: String, password: String): String? {
-        val db = readableDatabase
-        val cursor = db.rawQuery(
-            "SELECT role FROM users WHERE email=? AND password=?",
-            arrayOf(email, password)
-        )
-        return if (cursor.moveToFirst()) {
-            cursor.getString(0)
-        } else {
-            null
-        }.also {
-            cursor.close()
-        }
-    }
-
-    fun registerUser(name: String, email: String, password: String, role: String): Boolean {
-        val db = writableDatabase
-        val cursor = db.rawQuery("SELECT * FROM users WHERE email=?", arrayOf(email))
-        if (cursor.count > 0) {
-            cursor.close()
-            return false
-        }
-        cursor.close()
-        val stmt =
-            db.compileStatement("INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)")
-        stmt.bindString(1, name)
-        stmt.bindString(2, email)
-        stmt.bindString(3, password)
-        stmt.bindString(4, role)
-        stmt.executeInsert()
-        return true
-    }
-
-    fun getAllUsers(): List<String> {
-        val usersList = mutableListOf<String>()
-        val db = readableDatabase
-        val cursor = db.rawQuery("SELECT name, email, role FROM users", null)
-        while (cursor.moveToNext()) {
-            val name = cursor.getString(0)
-            val email = cursor.getString(1)
-            val role = cursor.getString(2)
-            usersList.add("$name - $email - ($role)")
-        }
-        cursor.close()
-        return usersList
-    }
-
-    fun addProduct(name: String, price: Double, stock: Int): Boolean {
-        val db = writableDatabase
-        val stmt = db.compileStatement("INSERT INTO products (name, price, stock) VALUES (?, ?, ?)")
-        stmt.bindString(1, name)
-        stmt.bindDouble(2, price)
-        stmt.bindLong(3, stock.toLong())
-        return stmt.executeInsert() != -1L
-    }
-
-    fun getAllProducts(): List<Product> {
-        val productList = mutableListOf<Product>()
-        val db = readableDatabase
-        val cursor = db.rawQuery("SELECT name, price, stock FROM products", null)
-
-        if (cursor.moveToFirst()) {
-            do {
-                val name = cursor.getString(0)
-                val price = cursor.getDouble(1)
-                val stock = cursor.getInt(2)
-                productList.add(Product(name, price, stock))  // Pastikan ini benar
-            } while (cursor.moveToNext())
-        }
-        cursor.close()
-        db.close()
-
-        return productList
+    override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
+        db?.execSQL("DROP TABLE IF EXISTS $TABLE_TASKS")
+        db?.execSQL("DROP TABLE IF EXISTS $TABLE_USERS")
+        onCreate(db)
     }
 
 
-    // Menambahkan produk ke keranjang
-    fun addToCart(productId: Int, productName: String, price: Double, quantity: Int) {
-        val db = writableDatabase
+    fun registerUser(username: String, password: String): Boolean {
+        val db = this.writableDatabase
         val values = ContentValues()
-        values.put("product_id", productId)
-        values.put("product_name", productName)
-        values.put("price", price)
-        values.put("quantity", quantity)
-        db.insert("keranjang", null, values)
+        values.put(COLUMN_USERNAME, username)
+        values.put(COLUMN_PASSWORD, password)
+        val result = db.insert(TABLE_USERS, null, values)
         db.close()
+        return result != -1L
     }
 
-    // Mendapatkan semua produk dalam keranjang
-    fun getCartItems(): List<CartItem> {
-        val cartList = mutableListOf<CartItem>()
-        val db = readableDatabase
-        val cursor = db.rawQuery(
-            """
-        SELECT k.id, p.name, k.price, k.quantity 
-         FROM keranjang k 
-        JOIN products p ON k.product_id = p.id
-               """, null
+
+    fun checkUser(username: String, password: String): Boolean {
+        val db = this.readableDatabase
+        val query = ("SELECT * FROM $TABLE_USERS WHERE $COLUMN_USERNAME = ? AND $COLUMN_PASSWORD = ?")
+        val cursor: Cursor = db.rawQuery(query, arrayOf(username, password))
+        val exists = cursor.count > 0
+        cursor.close()
+        db.close()
+        return exists
+    }
+
+
+    fun addTask(userId: Int, title: String, description: String, category: String): Long {
+        val db = this.writableDatabase
+        val values = ContentValues()
+        values.put(COLUMN_USER_ID_FK, userId)
+        values.put(COLUMN_TITLE, title)
+        values.put(COLUMN_DESCRIPTION, description)
+        values.put(COLUMN_CATEGORY, category)
+        values.put(COLUMN_STATUS, 0)
+        values.put(COLUMN_CREATED_AT, System.currentTimeMillis().toString())
+        val result = db.insert(TABLE_TASKS, null, values)
+        db.close()
+        return result
+    }
+
+
+    fun getTasksByUser(userId: Int): Cursor {
+        val db = this.readableDatabase
+        return db.query(
+            TABLE_TASKS,
+            null,
+            "$COLUMN_USER_ID_FK=?",
+            arrayOf(userId.toString()),
+            null,
+            null,
+            "$COLUMN_CREATED_AT DESC"
+        )
+    }
+
+
+    fun updateTask(taskId: Int, title: String, description: String, category: String, status: Int): Boolean {
+        val db = this.writableDatabase
+        val values = ContentValues()
+        values.put(COLUMN_TITLE, title)
+        values.put(COLUMN_DESCRIPTION, description)
+        values.put(COLUMN_CATEGORY, category)
+        values.put(COLUMN_STATUS, status)
+        val result = db.update(TABLE_TASKS, values, "$COLUMN_TASK_ID=?", arrayOf(taskId.toString()))
+        db.close()
+        return result > 0
+    }
+
+
+    fun deleteTask(taskId: Int): Boolean {
+        val db = this.writableDatabase
+        val result = db.delete(TABLE_TASKS, "$COLUMN_TASK_ID=?", arrayOf(taskId.toString()))
+        db.close()
+        return result > 0
+    }
+
+    fun getUserId(username: String): Int {
+        val db = this.readableDatabase
+        val cursor = db.query(
+            TABLE_USERS,
+            arrayOf(COLUMN_USER_ID),
+            "$COLUMN_USERNAME=?",
+            arrayOf(username),
+            null, null, null
         )
 
-
+        var userId = -1
         if (cursor.moveToFirst()) {
-            do {
-                val id = cursor.getInt(0)
-                val productName = cursor.getString(1) // Ambil nama produk dari tabel products
-                val price = cursor.getDouble(2)
-                val quantity = cursor.getInt(3)
-
-                cartList.add(CartItem(id, 0, productName, price, quantity)) // productId tidak perlu
-            } while (cursor.moveToNext())
-        }
-
-        cursor.close()
-        return cartList
-
-    }
-
-    fun clearCart() {
-        val db = writableDatabase
-        db.execSQL("DELETE FROM keranjang")
-        db.close()
-    }
-
-
-    // Proses checkout, hapus semua item di keranjang
-    fun checkoutCart() {
-        val cartItems = getCartItems()
-        val db = writableDatabase
-
-        for (item in cartItems) {
-            val totalPrice = item.price * item.quantity
-            val values = ContentValues()
-            values.put("product_id", item.productId)
-            values.put("quantity", item.quantity)
-            values.put("total_price", totalPrice)
-            values.put("date", System.currentTimeMillis().toString())
-
-            db.insert("pembelian", null, values)
-            db.execSQL(
-                "UPDATE barang SET stock = stock + ? WHERE id = ?",
-                arrayOf(item.quantity, item.productId)
-            )
-        }
-
-        clearCart()  // Hapus isi keranjang setelah checkout
-        db.close()
-
-    }
-
-    fun removeCartItem(cartItemId: Int) {
-        val db = writableDatabase
-        db.delete("keranjang", "id=?", arrayOf(cartItemId.toString()))
-        db.close()
-    }
-
-    fun getProductNameById(productId: Int): String? {
-        val db = this.readableDatabase
-        val query = "SELECT name FROM products WHERE id = ?"
-        val cursor = db.rawQuery(query, arrayOf(productId.toString()))
-
-        var productName: String? = null
-        if (cursor.moveToFirst()) {
-            productName = cursor.getString(0)
+            userId = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_USER_ID))
         }
         cursor.close()
-        return productName
-    }
-
-    fun getAllTransactions(): List<SurfaceControl.Transaction> {
-        val transactions = mutableListOf<SurfaceControl.Transaction>()
-        val db = this.readableDatabase
-        val query = "SELECT * FROM transaksi ORDER BY tanggal DESC"
-        val cursor = db.rawQuery(query, null)
-
-        if (cursor.moveToFirst()) {
-            do {
-                val id = cursor.getInt(cursor.getColumnIndexOrThrow("id"))
-                val tanggal = cursor.getString(cursor.getColumnIndexOrThrow("tanggal"))
-                val totalHarga = cursor.getDouble(cursor.getColumnIndexOrThrow("total_harga"))
-
-                transactions.add(SurfaceControl.Transaction (id, tanggal, totalHarga))
-            } while (cursor.moveToNext())
-        }
-
-        cursor.close()
         db.close()
-        return transactions
+        return userId
     }
-
-
-
 
 }
