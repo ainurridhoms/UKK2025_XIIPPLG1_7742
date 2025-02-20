@@ -4,36 +4,44 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".MainActivity"
+    android:background="@drawable/xx">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:layout_editor_absoluteY="172dp">
 
         <Button
             android:id="@+id/createTaskButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:backgroundTint="#4682B4"
             android:text="Buat Kegiatan" />
 
         <Button
             android:id="@+id/taskListButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Daftar Kegiatan"/>
+            android:backgroundTint="#4682B4"
+            android:text="Daftar Kegiatan" />
 
         <Button
             android:id="@+id/historyButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Histori Kegiatan"/>
+            android:backgroundTint="#4682B4"
+            android:text="Histori Kegiatan" />
 
         <Button
             android:id="@+id/profileButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:backgroundTint="#4682B4"
             android:text="Profil" />
 
     </LinearLayout>
