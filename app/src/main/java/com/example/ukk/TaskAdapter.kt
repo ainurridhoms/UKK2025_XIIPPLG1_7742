@@ -11,10 +11,10 @@ import androidx.recyclerview.widget.RecyclerView
 
 class TaskAdapter(
     private val context: Context,
-    private var taskList: MutableList<Task>,
-    private val onTaskClicked: (Task) -> Unit,
-    private val onTaskDeleted: (Task) -> Unit,
-    private val onTaskEdited: (Task) -> Unit
+    private var taskList: MutableList<Task>, // List yang akan ditampilkan
+    private val onTaskClicked: (Task) -> Unit, // Callback untuk task clicked
+    private val onTaskDeleted: (Task) -> Unit, // Callback untuk task deleted
+    private val onTaskEdited: (Task) -> Unit  // Callback untuk task edited
 ) : RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
 
     private val selectedTasks = mutableSetOf<Task>()

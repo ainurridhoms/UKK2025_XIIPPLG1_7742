@@ -1,6 +1,5 @@
 package com.example.ukk
 
-import DatabaseHelper
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.os.Bundle
@@ -48,7 +47,7 @@ class EditTaskActivity : AppCompatActivity() {
         dateEditText = findViewById(R.id.dateEditText)
         timeEditText = findViewById(R.id.timeEditText)
         categorySpinner = findViewById(R.id.categorySpinner)
-        saveButton = findViewById(R.id.saveTaskButton)
+        saveButton = findViewById(R.id.saveButton)
 
         // Set data task yang ada
         descriptionEditText.setText(task.description)

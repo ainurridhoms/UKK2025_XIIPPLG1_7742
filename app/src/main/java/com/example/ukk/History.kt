@@ -1,7 +1,7 @@
 package com.example.ukk
 
-import DatabaseHelper
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -27,10 +27,10 @@ class HistoryActivity : AppCompatActivity() {
             this,
             historyList,
             onTaskClicked = { task ->
-                // Tidak ada aksi karena tidak ada fitur edit
+                // Tidak ada aksi karena tidak ada fitur edit di HistoryActivity
             },
             onTaskDeleted = { task ->
-                // Tidak ada aksi untuk menghapus
+                onTaskDeleted(task) // Memanggil fungsi onTaskDeleted untuk menghapus task
             },
             onTaskEdited = { task ->
                 // Tidak ada aksi edit di HistoryActivity
@@ -49,5 +49,20 @@ class HistoryActivity : AppCompatActivity() {
         // Ambil histori dari database dan tambahkan ke list
         historyList.addAll(dbHelper.getHistoricalTasks())
         historyAdapter.notifyDataSetChanged()  // Update RecyclerView dengan data histori
+    }
+
+    private fun onTaskDeleted(task: Task) {
+        // Menghapus task dari database
+        val deletedRows = dbHelper.deleteTask(task.id)
+
+        if (deletedRows > 0) {
+            // Menghapus task dari list yang ditampilkan di RecyclerView
+            historyList.remove(task)
+
+            // Mengupdate RecyclerView untuk merefleksikan perubahan
+            historyAdapter.notifyDataSetChanged()
+
+            Toast.makeText(this, "Task berhasil dihapus", Toast.LENGTH_SHORT).show()
+        }
     }
 }

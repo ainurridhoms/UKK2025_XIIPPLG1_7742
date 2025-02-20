@@ -23,8 +23,8 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, HistoryActivity::class.java))
         }
 
-        findViewById<Button>(R.id.profileButton).setOnClickListener {
-            startActivity(Intent(this, ProfileActivity::class.java))
-        }
+//        findViewById<Button>(R.id.profileButton).setOnClickListener {
+//            startActivity(Intent(this, ProfileActivity::class.java))
+//        }
     }
 }

@@ -1,3 +1,4 @@
+package com.example.ukk
 
 import android.content.ContentValues
 import android.content.Context
@@ -5,7 +6,6 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
-import com.example.ukk.Task
 
 class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
@@ -159,6 +159,8 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
 
     // Helper function to get Task from Cursor
     private fun getTaskFromCursor(cursor: Cursor): Task {
+        // Mengambil indeks kolom
+        val columnIndexId = cursor.getColumnIndex(COLUMN_ID)
         val columnIndexDescription = cursor.getColumnIndex(COLUMN_DESCRIPTION)
         val columnIndexDate = cursor.getColumnIndex(COLUMN_DATE)
         val columnIndexTime = cursor.getColumnIndex(COLUMN_TIME)
@@ -166,20 +168,24 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         val columnIndexIsCompleted = cursor.getColumnIndex(COLUMN_IS_COMPLETED)
         val columnIndexIsHistory = cursor.getColumnIndex(COLUMN_IS_HISTORY)
 
-        if (columnIndexDescription == -1 || columnIndexDate == -1 || columnIndexTime == -1 ||
-            columnIndexCategory == -1 || columnIndexIsCompleted == -1 || columnIndexIsHistory == -1
-        ) {
+        // Cek apakah kolom ditemukan di dalam cursor
+        if (columnIndexId == -1 || columnIndexDescription == -1 || columnIndexDate == -1 ||
+            columnIndexTime == -1 || columnIndexCategory == -1 || columnIndexIsCompleted == -1 ||
+            columnIndexIsHistory == -1) {
             Log.e("DatabaseHelper", "Beberapa kolom tidak ditemukan dalam query result")
             throw Exception("Database column missing")
         }
 
+        // Pastikan semua kolom ditemukan dan ambil data dari cursor
         return Task(
-            cursor.getString(columnIndexDescription), // description harus String
-            cursor.getString(columnIndexDate),         // date harus String
-            cursor.getString(columnIndexTime),         // Waktu task
-            cursor.getString(columnIndexCategory),     // Kategori task
-            cursor.getInt(columnIndexIsCompleted) == 1, // Status apakah selesai (convert int ke boolean)
-            cursor.getInt(columnIndexIsHistory) == 1    // Status apakah history (convert int ke boolean)
+            id = cursor.getInt(columnIndexId),  // Ambil ID sebagai integer
+            description = cursor.getString(columnIndexDescription),  // Ambil description sebagai String
+            date = cursor.getString(columnIndexDate),  // Ambil date sebagai String
+            time = cursor.getString(columnIndexTime),  // Ambil time sebagai String
+            category = cursor.getString(columnIndexCategory),  // Ambil category sebagai String
+            isCompleted = cursor.getInt(columnIndexIsCompleted) == 1,  // Status selesai sebagai boolean
+            isHistory = cursor.getInt(columnIndexIsHistory) == 1  // Status sejarah sebagai boolean
         )
     }
+
 }
